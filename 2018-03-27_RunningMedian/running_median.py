@@ -14,27 +14,40 @@ def getNextA(prev_A, a, b):
 large_heap = []
 small_heap = []
 def getMedianWith(a):
-	smallest_large_heap = large_heap[0]
-	largest_small_heap = -small_heap[0]		# Because heapq supports 'min-heap', we should negative for small heap
+	if len(small_heap) == 0:
+		heapq.heappush(small_heap, -a)
+	elif len(large_heap) == 0:
+		prev = -small_heap[0]
 
-	if a >= smallest_large_heap:
-		heapq.heappush(large_heap, a)
+		if a >= prev:
+			# just insert into large heap
+			heapq.heappush(large_heap, a)
+		else:
+			heapq.heappush(large_heap, prev)
+			heapq.heappop(small_heap)
+			heapq.heappush(small_heap, -a)
+	else:
+		smallest_large_heap = large_heap[0]
+		largest_small_heap = -small_heap[0]		# Because heapq supports 'min-heap', we should negative for small heap
 
-		# if large_heap contains more-than-2 elements compared to small_heap,
-		if len(large_heap) > len(small_heap) + 1:
-			# move the smallest one to small_heap
-			smallest_large_heap = heapq.heappop(large_heap)
-			heapq.heappush(small_heap, -smallest_large_heap)	# Because heapq supports 'min-heap', we should negative for small heap
-	elif a <= largest_small_heap:
-		heapq.heappush(small_heap, a)
+		if a >= smallest_large_heap:
+			heapq.heappush(large_heap, a)
 
-		# if small_heap contains more-than-1 elements compared to large_heap
-		if len(small_heap) > len(large_heap):
-			# move the largest one to large_heap
-			largest_small_heap = -heapq.heappop(small_heap)
-			heapq.heappush(large_heap, largest_small_heap)
+			# if large_heap contains more-than-1 elements compared to small_heap,
+			if len(large_heap) > len(small_heap):
+				# move the smallest one to small_heap
+				smallest_large_heap = heapq.heappop(large_heap)
+				heapq.heappush(small_heap, -smallest_large_heap)	# Because heapq supports 'min-heap', we should negative for small heap
+		else:
+			heapq.heappush(small_heap, -a)
 
-	return large_heap[0]
+			# if small_heap contains more-than-2 elements compared to large_heap
+			if len(small_heap) > len(large_heap) + 1:
+				# move the largest one to large_heap
+				largest_small_heap = -heapq.heappop(small_heap)
+				heapq.heappush(large_heap, largest_small_heap)
+
+	return -small_heap[0]
 
 ###-----------------------------------------
 rl = lambda: sys.stdin.readline()
@@ -59,7 +72,7 @@ for idxTest in range(number_of_test_case):
 
 		# Do Work!
 		median = getMedianWith(A_i)
-		# print(median, A_i, heap)
+		# print(A_i, large_heap, small_heap, median)
 		sum += median
 
 		prev_A = A_i
